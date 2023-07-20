@@ -1,0 +1,25 @@
+version: '3.1'
+
+services:
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: /data/postgres
+    volumes:
+      - models:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - web
+
+networks:
+  web:
+    driver: bridge
+
+volumes:
+  database:
+    driver: local
