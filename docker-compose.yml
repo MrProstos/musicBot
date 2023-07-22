@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       PGDATA: /data/postgres
     volumes:
-      - models:/data/postgres
+      - database:/data/postgres
     ports:
       - "5432:5432"
     networks:
