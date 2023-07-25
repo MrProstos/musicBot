@@ -1,0 +1,10 @@
+app:
+  token: ""
+  debug: true
+
+postgres:
+  host: "localhost"
+  port: "5432"
+  user: ""
+  password: ""
+  database_name: ""
