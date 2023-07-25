@@ -1,0 +1,7 @@
+/.idea
+
+/config/config.yml
+
+/storage/audio/*
+!/storage/audio/.gitkeep
+
