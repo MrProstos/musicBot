@@ -12,16 +12,16 @@ type (
 	}
 
 	App struct {
-		Token string `yaml:"token" env-required:"true"`
-		Debug bool   `yaml:"debug" env-required:"true"`
+		Token string `env:"TELEGRAM_TOKEN" env-required:"true"`
+		Debug bool   `env:"TELEGRAM_DEBUG" env-required:"true"`
 	}
 
 	Psql struct {
-		Host         string `yaml:"host" env-default:"localhost"`
-		Port         string `yaml:"port" env-default:"5432"`
-		User         string `yaml:"user" env-required:"true"`
-		Password     string `yaml:"password" env-required:"true"`
-		DatabaseName string `yaml:"database_name" env-required:"true"`
+		Host         string `env:"DB_HOST" env-default:"localhost"`
+		Port         string `env:"DB_PORT" env-default:"5432"`
+		User         string `env:"DB_USER" env-required:"true"`
+		Password     string `env:"DB_PASSWORD" env-required:"true"`
+		DatabaseName string `env:"DB_NAME" env-required:"true"`
 	}
 )
 
@@ -29,7 +29,7 @@ type (
 func NewConfig() (*Config, error) {
 	cfg := new(Config)
 
-	err := cleanenv.ReadConfig("./config/config.yml", cfg)
+	err := cleanenv.ReadConfig(".env", cfg)
 	if err != nil {
 		return nil, fmt.Errorf("config error: %w", err)
 	}
