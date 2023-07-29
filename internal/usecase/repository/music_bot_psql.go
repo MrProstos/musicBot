@@ -4,23 +4,24 @@ import (
 	"github.com/MrProstos/musicBot/internal/models"
 	"github.com/MrProstos/musicBot/pkg/psql"
 	"github.com/google/uuid"
-	"github.com/kkdai/youtube/v2"
+	"log"
 	"os/exec"
 )
 
 type Repository struct {
-	psql.Psql
+	*psql.Psql
 }
 
 func New(db *psql.Psql) *Repository {
-	return &Repository{*db}
+	return &Repository{db}
 }
 
 func (repo *Repository) GetPlaylistByUserId(userId uint) *models.Playlist {
-	var playlist *models.Playlist
+	playlist := &models.Playlist{}
 
-	repo.First(playlist, "user_id = ?", userId)
-	if playlist == nil {
+	result := repo.Where("user_id = ?", userId).First(playlist)
+	if result.Error != nil {
+		log.Println(result.Error)
 		return nil
 	}
 
@@ -34,20 +35,24 @@ func (repo *Repository) CreatePlaylist(userId uint) *models.Playlist {
 	return playlist
 }
 
-func (repo *Repository) StoreAudioFileFromYoutube(video *youtube.Video, playListId uint) *models.AudioStorage {
-	formats := video.Formats.WithAudioChannels()
-	filePath := models.AudioPath + uuid.New().String()
+func (repo *Repository) GetAudioFileById(fileId string) *models.AudioStorage {
+	audioStorage := &models.AudioStorage{}
 
-	cmd := exec.Command("ffmpeg", "-y", "-i", formats[0].URL, "-f", "mp3", filePath)
+	result := repo.Where("file_id = ?", fileId).First(audioStorage)
+	if result.Error != nil {
+		log.Println(result.Error)
+		return nil
+	}
+
+	return audioStorage
+}
+
+func (repo *Repository) StoreAudioFileFromYoutube(audioStorage *models.AudioStorage) *models.AudioStorage {
+	filePath := models.AudioPath + uuid.New().String()
+	cmd := exec.Command("ffmpeg", "-y", "-i", audioStorage.FilePath, "-f", "mp3", filePath)
 	cmd.Run()
 
-	audioStorage := &models.AudioStorage{
-		FilePath:   filePath,
-		Title:      video.Title,
-		Author:     video.Author,
-		VideoId:    video.ID,
-		PlaylistId: playListId,
-	}
+	audioStorage.FilePath = filePath
 
 	repo.Create(audioStorage)
 

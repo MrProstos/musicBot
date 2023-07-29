@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"github.com/MrProstos/musicBot/config"
+	"github.com/MrProstos/musicBot/internal/models"
 	"github.com/MrProstos/musicBot/internal/usecase/repository"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/kkdai/youtube/v2"
@@ -29,19 +30,6 @@ func NewMusicBot(cfg config.App) (*MusicBot, error) {
 	newBot.Debug = cfg.Debug
 
 	return &MusicBot{BotAPI: newBot}, nil
-}
-
-func (mBot *MusicBot) setCommands() {
-	mBot.Request(tgbotapi.NewSetMyCommands(
-		tgbotapi.BotCommand{
-			Command:     HelpCommand,
-			Description: "Помощь",
-		},
-		tgbotapi.BotCommand{
-			Command:     PlaylistCommand,
-			Description: "Показать список треков",
-		},
-	))
 }
 
 func (mBot *MusicBot) StartListening() {
@@ -73,6 +61,19 @@ func (mBot *MusicBot) StartListening() {
 	}
 }
 
+func (mBot *MusicBot) setCommands() {
+	mBot.Request(tgbotapi.NewSetMyCommands(
+		tgbotapi.BotCommand{
+			Command:     HelpCommand,
+			Description: "Помощь",
+		},
+		tgbotapi.BotCommand{
+			Command:     PlaylistCommand,
+			Description: "Показать список треков",
+		},
+	))
+}
+
 func (mBot *MusicBot) TextController(update tgbotapi.Update, msg *tgbotapi.Chattable) {
 
 	if mBot.isYoutubeUrl(update.Message.Text) {
@@ -82,18 +83,36 @@ func (mBot *MusicBot) TextController(update tgbotapi.Update, msg *tgbotapi.Chatt
 			playlist = mBot.DB.CreatePlaylist(uint(update.Message.From.ID))
 		}
 
-		video, err := new(youtube.Client).GetVideo(update.Message.Text)
-		if err != nil {
-			*msg = tgbotapi.NewMessage(update.Message.Chat.ID, "Видео не найдено")
-			return
-		}
+		audioStorage := mBot.getAudioStorageFromYoutube(update.Message.Text)
+		audioStorage.PlaylistId = playlist.Id
 
-		audioStorage := mBot.DB.StoreAudioFileFromYoutube(video, playlist.Id)
+		existAudioStorage := mBot.DB.GetAudioFileById(audioStorage.FileId)
+		if existAudioStorage == nil {
+			audioStorage = mBot.DB.StoreAudioFileFromYoutube(audioStorage)
+		} else {
+			audioStorage.FilePath = existAudioStorage.FilePath
+		}
 
 		msgAudio := tgbotapi.NewAudio(update.Message.From.ID, tgbotapi.FilePath(audioStorage.FilePath))
 		msgAudio.Title = audioStorage.Title
+		msgAudio.Performer = audioStorage.Author
 
 		*msg = msgAudio
+	}
+}
+
+func (mBot *MusicBot) getAudioStorageFromYoutube(videoUrl string) *models.AudioStorage {
+	video, err := new(youtube.Client).GetVideo(videoUrl)
+	if err != nil {
+		return nil
+	}
+
+	formats := video.Formats.WithAudioChannels()
+	return &models.AudioStorage{
+		FileId:   video.ID,
+		Title:    video.Title,
+		Author:   video.Author,
+		FilePath: formats[0].URL,
 	}
 }
 
