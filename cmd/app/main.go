@@ -1,8 +1,8 @@
 package main
 
 import (
-	"MrProstos/download_utils/config"
-	"MrProstos/download_utils/internal/app"
+	"github.com/MrProstos/musicBot/config"
+	"github.com/MrProstos/musicBot/internal/app"
 	"log"
 )
 

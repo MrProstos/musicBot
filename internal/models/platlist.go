@@ -1,4 +1,4 @@
-package Models
+package models
 
 import (
 	"time"
@@ -9,5 +9,5 @@ type Playlist struct {
 	UserId    uint      `gorm:"not null"`
 	CreatedAt time.Time `gorm:"index;not null;default:NOW()"`
 
-	Musics []PlayListItem `gorm:"foreignKey:PlaylistId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+	Musics []AudioStorage `gorm:"foreignKey:PlaylistId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }

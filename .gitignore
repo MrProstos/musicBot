@@ -1,6 +1,5 @@
 /.idea
-
-/config/config.yml
+/.env
 
 /storage/audio/*
 !/storage/audio/.gitkeep
