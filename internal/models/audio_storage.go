@@ -4,6 +4,7 @@ import "time"
 
 const AudioPath = "storage/audio/"
 
+// AudioStorage storage audio file
 type AudioStorage struct {
 	Id         uint `gorm:"primaryKey"`
 	PlaylistId uint

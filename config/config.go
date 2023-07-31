@@ -11,11 +11,13 @@ type (
 		Psql `yaml:"postgres"`
 	}
 
+	// App config telegram bot
 	App struct {
 		Token string `env:"TELEGRAM_TOKEN" env-required:"true"`
 		Debug bool   `env:"TELEGRAM_DEBUG" env-required:"true"`
 	}
 
+	// Psql config postgres connection
 	Psql struct {
 		Host         string `env:"DB_HOST" env-default:"localhost"`
 		Port         string `env:"DB_PORT" env-default:"5432"`
@@ -25,7 +27,7 @@ type (
 	}
 )
 
-// NewConfig returns app config.
+// NewConfig returns configs
 func NewConfig() (*Config, error) {
 	cfg := new(Config)
 

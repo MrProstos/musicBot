@@ -15,12 +15,14 @@ const (
 	PlaylistCommand string = "playlist"
 )
 
+// MusicBot telegram bot realization
 type MusicBot struct {
 	*tgbotapi.BotAPI
 
 	DB *repository.Repository
 }
 
+// NewMusicBot create new MusicBot instance
 func NewMusicBot(cfg config.App) (*MusicBot, error) {
 	newBot, err := tgbotapi.NewBotAPI(cfg.Token)
 	if err != nil {
@@ -32,7 +34,8 @@ func NewMusicBot(cfg config.App) (*MusicBot, error) {
 	return &MusicBot{BotAPI: newBot}, nil
 }
 
-func (mBot *MusicBot) StartListening() {
+// StartListeningUpdates start listening for updates
+func (mBot *MusicBot) StartListeningUpdates() {
 	mBot.setCommands()
 
 	updateConfig := tgbotapi.NewUpdate(-1)
@@ -61,6 +64,7 @@ func (mBot *MusicBot) StartListening() {
 	}
 }
 
+// setCommands set telegram commands
 func (mBot *MusicBot) setCommands() {
 	mBot.Request(tgbotapi.NewSetMyCommands(
 		tgbotapi.BotCommand{
@@ -74,6 +78,7 @@ func (mBot *MusicBot) setCommands() {
 	))
 }
 
+// TextController text controller
 func (mBot *MusicBot) TextController(update tgbotapi.Update, msg *tgbotapi.Chattable) {
 
 	if mBot.isYoutubeUrl(update.Message.Text) {
@@ -86,6 +91,7 @@ func (mBot *MusicBot) TextController(update tgbotapi.Update, msg *tgbotapi.Chatt
 		audioStorage := mBot.getAudioStorageFromYoutube(update.Message.Text)
 		audioStorage.PlaylistId = playlist.Id
 
+		// if the audio file is not in the storage, then download it
 		existAudioStorage := mBot.DB.GetAudioFileById(audioStorage.FileId)
 		if existAudioStorage == nil {
 			audioStorage = mBot.DB.StoreAudioFileFromYoutube(audioStorage)
@@ -101,6 +107,7 @@ func (mBot *MusicBot) TextController(update tgbotapi.Update, msg *tgbotapi.Chatt
 	}
 }
 
+// getAudioStorageFromYoutube get models.AudioStorage by youtube url
 func (mBot *MusicBot) getAudioStorageFromYoutube(videoUrl string) *models.AudioStorage {
 	video, err := new(youtube.Client).GetVideo(videoUrl)
 	if err != nil {
@@ -116,6 +123,7 @@ func (mBot *MusicBot) getAudioStorageFromYoutube(videoUrl string) *models.AudioS
 	}
 }
 
+// isYoutubeUrl is youtube url
 func (mBot *MusicBot) isYoutubeUrl(url string) bool {
 	regex := regexp.MustCompile("https:\\/\\/www\\.youtube\\.com\\/watch.+v=\\w+")
 

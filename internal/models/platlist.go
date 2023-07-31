@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Playlist users playlist
 type Playlist struct {
 	Id        uint      `gorm:"primaryKey"`
 	UserId    uint      `gorm:"not null"`

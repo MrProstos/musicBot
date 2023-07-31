@@ -8,10 +8,12 @@ import (
 	"gorm.io/gorm"
 )
 
+// Psql postgres struct
 type Psql struct {
 	*gorm.DB
 }
 
+// New create new Psql instance
 func New(psql config.Psql) (*Psql, error) {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Moscow",
@@ -26,6 +28,7 @@ func New(psql config.Psql) (*Psql, error) {
 	return &Psql{gormDB}, nil
 }
 
+// AutoMigrate run migrate tables
 func (db *Psql) AutoMigrate() error {
 	err := db.DB.AutoMigrate(
 		new(Models.Playlist),

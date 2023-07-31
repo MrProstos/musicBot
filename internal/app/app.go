@@ -26,5 +26,5 @@ func Run(cfg *config.Config) {
 
 	newBot.DB = repository.New(db)
 
-	newBot.StartListening()
+	newBot.StartListeningUpdates()
 }
